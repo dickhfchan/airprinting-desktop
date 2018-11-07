@@ -1,0 +1,25 @@
+$small: 768px !default;
+$medium: 992px !default;
+$large: 1200px !default;
+$extraLarge: 1920px !default;
+
+// color
+$primary: #004CE4;
+$secondary: #9299A9;
+$accent: #003398;
+$color4: #7E9FE4;
+$color5: #002266;
+$mainBackColor: #F3F4F5;
+
+@mixin mask {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+}
+@mixin ellipsis{
+  overflow: hidden;
+  text-overflow:ellipsis;
+  white-space: nowrap;
+}

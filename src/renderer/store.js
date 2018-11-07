@@ -1,0 +1,46 @@
+import Vue from 'vue'
+import Vuex from 'vuex'
+
+Vue.use(Vuex)
+
+export default new Vuex.Store({
+  state: {
+    mode: process.env.NODE_ENV,
+    authenticated: false,
+    user: {},
+    api: `http://127.0.0.1:8081/api/v1`,
+    printerFilterInfo: {
+      size: [
+        {text: 'A4', value: 'a4'},
+        {text: 'A3', value: 'a3'},
+      ],
+      color: [
+        {text: 'B/W', value: 'b/w'},
+        {text: 'Color', value: 'color'},
+      ],
+      side: [
+        {text: 'Single', value: 'single'},
+        {text: 'Double', value: 'double'},
+      ],
+    },
+    lastSelectedPrinterOptions: null,
+    // ui
+    toolbar: {
+      title: null,
+    },
+    signInDialogVisible: true,
+    // from backend
+    recaptcha: null,
+    googleSignin: null,
+    googleMap: null,
+    facebookSignin: null,
+    siteHomeTitle: null,
+    siteName: null,
+    payment: null,
+    s3: null,
+    stripe: null,
+    order: null,
+  },
+  mutations: {},
+  actions: {},
+})
