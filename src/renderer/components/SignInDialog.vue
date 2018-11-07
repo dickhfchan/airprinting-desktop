@@ -3,10 +3,8 @@ v-dialog.sign-in-dialog(v-model="visible", fullscreen='', hide-overlay='', trans
   v-card.sign-in-card
     v-toolbar.toolbar-style1(dark='', color='accent' dense)
       v-toolbar-title
-        v-btn.toolbar-icon-btn-style1(icon='', dark='', @click.native='visible = false')
-          v-icon close
         span Sign in
-    GoogleAndFacebookSignInBtns(@success="success")
+    GoogleAndFacebookSignInBtns
 </template>
 
 <script>
@@ -15,23 +13,15 @@ import * as ut from '@/plugins/utils'
 
 export default {
   components: {GoogleAndFacebookSignInBtns},
-  props: {
-    value: {},
-  },
+  props: {},
   data() {
     return {}
   },
   computed: {
-    visible: {
-      get() { return this.value },
-      set(value) { this.$emit('input', value) },
-    },
+    visible() { return !this.$store.state.authenticated },
   },
   // watch: {},
   methods: {
-    success() {
-      this.visible = false
-    },
   },
   // created() {},
   // mounted() {},

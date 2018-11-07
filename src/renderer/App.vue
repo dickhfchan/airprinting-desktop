@@ -1,9 +1,10 @@
 <template lang="pug">
 v-app(v-if="routerReady")
+  | {{a}}
   component(:is="'layout-'+($route.meta.layout || 'default')")
   //-
   CustomNotifications
-  SignInDialog(v-model="$store.state.signInDialogVisible")
+  SignInDialog
 </template>
 
 <script>
@@ -17,12 +18,15 @@ export default {
   components: {LayoutDefault, LayoutEmpty, CustomNotifications, SignInDialog},
   data () {
     return {
+      a: null,
     }
   },
   computed: {
     routerReady() {
       return this.$route.name || this.$route.path !== '/'
     },
+  },
+  mounted() {
   },
 }
 </script>

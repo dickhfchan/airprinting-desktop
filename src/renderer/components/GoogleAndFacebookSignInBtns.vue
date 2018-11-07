@@ -29,14 +29,13 @@ export default {
   },
   // watch: {},
   methods: {
-    async googleLogin(googleUser) {
-      const token = googleUser.getAuthResponse().id_token
-      const data = await this.$api.post(`/google/login-or-register`, {token})
+    async googleLogin(code) {
+      const data = await this.$api.post(`/google/login-or-register`, {code})
       this.afterLogin(data)
     },
-    async facebookLogin(facebookUser, response) {
-      const token = response.authResponse.accessToken
-      const data = await this.$api.post(`/facebook/login-or-register`, {token, id: facebookUser.id})
+    async facebookLogin(response) {
+      const token = response.access_token
+      const data = await this.$api.post(`/facebook/login-or-register`, {token})
       this.afterLogin(data)
     },
     async afterLogin(data) {

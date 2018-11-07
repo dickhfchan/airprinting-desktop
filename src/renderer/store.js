@@ -28,7 +28,7 @@ export default new Vuex.Store({
     toolbar: {
       title: null,
     },
-    signInDialogVisible: true,
+    signInDialogVisible: false,
     // from backend
     recaptcha: null,
     googleSignin: null,

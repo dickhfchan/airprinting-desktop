@@ -52,6 +52,7 @@
   },
   "dependencies": {
     "axios": "^0.18.0",
+    "electron-store": "^2.0.0",
     "helper-js": "^1.2.2",
     "scriptjs": "^2.5.9",
     "vue": "^2.5.16",

@@ -19,7 +19,7 @@ export default {
 
 <style lang="scss">
 .start-page{
-  // background-color: $primary;
+  background-color: $primary;
   display: flex;
   align-items: center;
   justify-content: center;

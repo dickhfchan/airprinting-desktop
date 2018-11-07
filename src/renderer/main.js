@@ -1,5 +1,4 @@
 import * as hp from 'helper-js'
-import '@babel/polyfill'
 import Vue from 'vue'
 import './plugins/vuetify'
 import Start from './Start.vue'
