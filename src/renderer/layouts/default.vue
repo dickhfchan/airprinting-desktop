@@ -1,9 +1,18 @@
 <template lang="pug">
-v-app
+v-app.layout-default
   v-toolbar(color="accent", dark='', fixed='', app='' :clipped-left="$vuetify.breakpoint.lgAndUp")
     .ml-2
       v-toolbar-side-icon(@click.stop='drawer = !drawer')
     v-toolbar-title {{$store.state.siteName}}
+    v-spacer
+    v-menu.mr-3(offset-y='')
+      .user-btn.subheading(slot='activator')
+        img.user-avatar(:src="$store.state.user.avatar")
+        span {{$store.state.user.name}}
+        v-icon arrow_drop_down
+      v-list
+        v-list-tile(@click="logout")
+          v-list-tile-title Logout
   v-navigation-drawer(v-model='drawer', fixed='', app='' :clipped="$vuetify.breakpoint.lgAndUp")
     v-list.main-menu(dense='')
       v-list-tile(:to="{name: 'home'}")
@@ -17,11 +26,18 @@ v-app
         v-list-tile-content
           v-list-tile-title Settings
   v-content
-    transition(name="slide-x-transition" mode="out-in")
-      router-view
+    v-container
+      v-layout
+        v-flex(xs12)
+          transition(name="slide-x-transition" mode="out-in")
+            router-view
 </template>
 
 <script>
+import * as ut from '@/plugins/utils'
+import {getAxiosInstance} from '@/plugins/axios'
+import storage from '@/plugins/storage'
+
 export default {
   // components: {},
   data() {
@@ -35,6 +51,13 @@ export default {
     goBack() {
       this.$router.go(-1)
     },
+    async logout() {
+      storage.set('auth_token', null)
+      const axiosInstance = getAxiosInstance()
+      delete axiosInstance.defaults.headers.common['Authorization']
+      await ut.pullUser.call(this)
+      this.$router.push({name: 'login'})
+    },
   },
   // created() {},
   // mounted() {},
@@ -43,6 +66,21 @@ export default {
 
 <style lang="scss">
 .layout-default{
+  .user-btn{
+    display: flex;
+    align-items: center;
+  }
+  .user-avatar{
+    $side: 43px;
+    width: $side;
+    height: $side;
+    border-radius: 100%;
+    margin-right: .5em;
+    transition: all .5s;
+    &:hover{
+      transform: scale(1.4);
+    }
+  }
 }
 .main-menu{
   .list__tile.list__tile--link{

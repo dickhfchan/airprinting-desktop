@@ -9,6 +9,7 @@ const router = new Router({
   routes: [
     { path: '/home', name: 'home', component: require('./views/Home.vue').default },
     { path: '/login', name: 'login', component: require('./views/Login.vue').default, meta: {layout: 'empty'} },
+    { path: '/edit-printer', name: 'editPrinter', component: require('./views/EditPrinter.vue').default },
     { path: '*', redirect: {name: 'home'} },
   ]
 })

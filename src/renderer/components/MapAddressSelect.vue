@@ -48,7 +48,6 @@
 <script>
 import * as hp from 'helper-js'
 import GoogleMap from '@/components/GoogleMap.vue'
-import isMobile from 'ismobilejs'
 import mapStyles from '@/other/googleMapStyles.js'
 import * as mapUtils from '@/plugins/mapUtils.js'
 import makeGoogleMapMyLocationBtn from '@/plugins/googleMapMyLocationBtn'
@@ -117,7 +116,7 @@ export default {
         zoom: 17,
         fullscreenControl: false,
         mapTypeControl: false,
-        zoomControl: !isMobile.any,
+        zoomControl: true,
         // streetViewControl: false,
         styles: mapStyles,
       })
