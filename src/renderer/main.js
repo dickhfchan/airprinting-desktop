@@ -28,6 +28,17 @@ Vue.use(confirm)
 Vue.use(axios)
 
 const start = async () => {
+  // auto redirect to login page when unauthorized
+  router.beforeEach((to, from, next) => {
+    if (to.name === 'login') {
+      next()
+    } else if (!store.state.authenticated) {
+      next({name: 'login'})
+    } else {
+      next()
+    }
+  })
+  //
   const start = new Vue({
     store,
     render: h => h(Start)
@@ -50,6 +61,7 @@ const start = async () => {
     store,
     render: h => h(App)
   }).$mount('#app')
+  store.state.app = app
   ut.keepAlive.call(app)
 }
 start()

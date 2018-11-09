@@ -42,7 +42,7 @@ export default {
         if (response.status === 401) {
           store.state.authenticated = false
           store.state.user = {}
-          store.state.signInDialogVisible = true
+          store.state.app.$router.push({name: 'login'})
         }
         doAlert(msg)
         config.finally && config.finally(pureData, error || data)
