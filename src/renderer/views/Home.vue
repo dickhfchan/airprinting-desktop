@@ -8,14 +8,16 @@
       v-card-title
         .headline Choose a printer
       v-list
-        v-list-tile(:to="{name: 'editPrinter'}")
+        v-list-tile(v-for="name in printerNames" :key="name" :to="{name: 'editPrinter'}")
           v-list-tile-content
-            v-list-tile-title Windows wps
+            v-list-tile-title {{name}}
           v-list-tile-action
             v-icon keyboard_arrow_right
 </template>
 
 <script>
+import Printer from '@/printer/Printer.js'
+
 export default {
   components: {},
   data() {
@@ -24,13 +26,17 @@ export default {
       configurePrinterDialog: {
         visible: false,
       },
+      printerNames: null,
     }
   },
   // computed: {},
   // watch: {},
   methods: {
-    configurePrinter() {
+    async configurePrinter() {
       this.configuring = true
+      const printerNames = await Printer.getInstalledPrinterNames()
+      this.configuring = false
+      this.printerNames = printerNames
       this.configurePrinterDialog.visible = true
     },
   },

@@ -1,29 +1,84 @@
 <template lang="pug">
 .edit-printer-page
   .display-1.accent--text Edit printer
-  v-card.mt-3
+  v-card.mt-3(v-if="data")
     v-card-text
-      .headline.mb-2 Printer basic info
+      .printer-info
+        .line
+          .label Name:
+          .value {{data.name}}
+        .line
+          .label Model no:
+          .value {{data.modelNo}}
+        .line
+          .label Color:
+          .value
+            v-icon.ml-1(:class="(supportColor?'success':'warning')+'--text'") {{supportColor?'check_circle':'error'}}
+        .line
+          .label Duplex:
+          .value
+            v-icon.ml-1(:class="(supportDuplex?'success':'warning')+'--text'") {{supportDuplex?'check_circle':'error'}}
+        .line
+          .label Paper size:
+          .value {{sizeText}}
+      br
       AddressInput(v-model="data.address" ref="addressInput")
       hr.mt-1
-      v-select(label="Printer model no." v-model="data.modelNo" :items="['example model no']")
-      v-layout(align-center)
-        v-flex(xs4)
-          b.paper-size-label Paper size:
-        v-flex(xs3
-          v-for="item in optionsInfo.size" :key="item.value"
-        )
-          v-checkbox.mt-0(:label="item.text" v-model="data.size" :value="item.value" hide-details)
-      v-checkbox(label="Support color printing", v-model="data.color" hide-details)
-      v-checkbox(label="Supports duplex printing", v-model="data.double" hide-details)
       .mt-3
-      .headline Price(per side)
+      .subheading Price(per side)
       .price-list
         .price-row.flex-sb-c(v-for="row in data.prices")
           .price-row-left {{priceText(row)}}
           .price-input
             v-text-field(type="number" hide-details single-line v-model="row.price" :min="$store.state.order.minPricePerSide")
-      v-btn.mt-3(color="accent" block @click="save") Save
+      //- opening hours
+      .subheading Opening hours
+      v-radio-group.pt-1(v-model="data.openingHoursType" hide-details)
+        v-radio(label="Allow request while I am online" value="online")
+        v-radio(label="Allow request in time period" value="period")
+      .mt-1(v-if="data.openingHoursType === 'period'")
+          h4.time-periods-title Time periods
+          table.time-period-table.mt-1(v-if="data.openingHours.length > 0")
+            tr
+              th Days
+              th.col-from From
+              th.col-to To
+              th.col-action
+            tr(v-for="row in data.openingHours")
+              td {{row.days | daysText}}
+              td {{row.from}}
+              td {{row.to}}
+              td
+                v-icon.period-remove-btn(@click="removePeriod(row)") close
+          span.error--text(v-else) No time periods.
+          div
+            v-btn.ml-0(color="accent" @click="addPeriod") Add time period
+          v-checkbox(label='Close on public holiday' v-model='data.closeOnHoliday')
+      //-
+      .mt-2
+      .subheading Status
+      v-radio-group.pt-1(v-model="data.suspended" hide-details)
+        v-radio(label="Open" :value="false")
+        v-radio(label="Suspended" :value="true")
+      v-btn.mt-3(color="accent" block @click="save" :loading="saving") Save
+  //- add period dialog =================================
+  v-dialog(v-model="apDialog.visible" hide-overlay='', transition='dialog-bottom-transition', scrollable :width="500")
+    v-card.add-time-period-card(tile='' v-if="apDialog.visible")
+      v-toolbar(dark color='accent')
+        v-btn(icon dark @click.native="apDialog.visible=false")
+          v-icon close
+        v-toolbar-title
+          span Add Time Period
+      v-card-text
+        .form-line
+          .form-label Days
+          .weekday-checkboxes
+            .weekday-checkbox(v-for="item in weekdayItems")
+              v-checkbox(v-model="item.checked" :label="item.text")
+        .title Time(eg: 09:30. min: 00:00. max: 23:59)
+        v-text-field.mt-0(v-model="apDialog.from" placeholder="From")
+        v-text-field.mt-1(v-model="apDialog.to" placeholder="To")
+        v-btn.mt-3(color="accent" block @click="saveTimePeriod") Save
 </template>
 
 <script>
@@ -34,37 +89,57 @@ export default {
   data() {
     return {
       optionsInfo: this.$store.state.printerFilterInfo,
-      data: {
-        address: null,
-        modelNo: null,
-        size: [],
-        color: false,
-        double: false,
-        prices: [],
+      data: null,
+      saving: false,
+      // add period dialog
+      apDialog: {
+        visible: false,
+        days: [],
+        from: null,
+        to: null,
       },
+      weekdayItems: [
+        {text: 'Mon', value: 1, checked: false},
+        {text: 'Tue', value: 2, checked: false},
+        {text: 'Wed', value: 3, checked: false},
+        {text: 'Thu', value: 4, checked: false},
+        {text: 'Fri', value: 5, checked: false},
+        {text: 'Sat', value: 6, checked: false},
+        {text: 'Sun', value: 0, checked: false},
+      ],
     }
   },
-  // computed: {},
+  filters: {
+    daysText(arr) {
+      const dayTexts = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+      return arr.map(n => dayTexts[n]).join(', ')
+    },
+  },
+  computed: {
+    sizeText() {
+      return this.data.size.map(v => this.$store.state.printerFilterInfo.find(v2 => v2.value === v).text).join(', ')
+    },
+    supportColor() {
+      return this.data.color.includes('color')
+    },
+    supportDuplex() {
+      return this.data.side.includes('double')
+    },
+  },
   // watch: {},
   methods: {
     async pull() {
-      let data = await this.$api.post('printer/mine')
-      data = Object.assign({}, data)
+      const data = await this.$api.post('printer/mine')
       data.prices = data.prices || []
-      data.color = data.color.includes('color')
-      data.double = data.side.includes('double')
-      delete data.side
+      if (!data.openingHours) {
+        data.openingHours = []
+      }
       this.data = data
+      this.generatePrices()
     },
     generatePrices() {
-      const colors = ['b/w']
-      if (this.data.color) {
-        colors.push('color')
-      }
-      const sides = ['single']
-      if (this.data.double) {
-        sides.push('double')
-      }
+      const colors = this.data.color
+      const sides = this.data.side
       const combinations = arrMultiply([this.data.size, colors, sides])
       const prices = combinations.map(com => {
         const old = this.data.prices.find(v => v.size === com[0] && v.color === com[1] && v.side === com[2])
@@ -80,48 +155,104 @@ export default {
     priceText(row) {
       return ['size', 'color', 'side'].map(key => this.optionsInfo[key].find(v => v.value === row[key]).text).join(', ')
     },
-    async save() {
-      if (!this.$refs.addressInput.hasValue) {
-        this.$alert('Address is required.')
-        return
-      }
-      if (!this.data.modelNo) {
-        this.$alert('Printer model no. is required.')
-        return
-      }
-      if (!this.data.size.length === 0) {
-        this.$alert('Paper size is required.')
-        return
-      }
-      if (this.data.prices.find(v => !v.price)) {
-        this.$alert('Price is invalid.')
-        return
-      }
-      const data = Object.assign({}, this.data)
-      data.color = ['b/w']
-      if (this.data.color) {
-        data.color.push('color')
-      }
-      data.side = ['single']
-      delete data.double
-      if (this.data.double) {
-        data.side.push('double')
-      }
-      data.prices.forEach(item => {
-        item.price = parseFloat(item.price)
+    addPeriod() {
+      this.weekdayItems.forEach(row => {
+        row.checked = false
       })
-      await this.$api.post('printer/update-basic', data)
-      this.$notifySuccess('Saved successfully.')
+      Object.assign(this.apDialog, {
+        visible: true,
+        from: null,
+        to: null,
+      })
+    },
+    removePeriod(row) {
+      hp.arrayRemove(this.data.openingHours, row)
+    },
+    saveTimePeriod() {
+      // validate
+      const days = this.weekdayItems.filter(v => v.checked)
+      .map(day => day.value)
+      const {from, to} = this.apDialog
+      if (days.length === 0) {
+        this.$alert('The days is required.')
+        return
+      }
+      if (!from || !to) {
+        this.$alert('The time is required.')
+        return
+      }
+      const validateTime = (hhmm) => {
+        if (!hhmm.match(/^\d{1,2}:\d{1,2}$/)) {
+          return false
+        }
+        const [h, m] = hhmm.split(':')
+        if (h > 23 || m > 59) {
+          return false
+        }
+        return true
+      }
+      if (!validateTime(from) || !validateTime(to)) {
+        this.$alert('The format of time is invalid.')
+        return
+      }
+      if (compareTime(from, to) > 0) {
+        this.$alert('The end time must be later than the start time.')
+        return
+      }
+      //
+      this.data.openingHours.push({days, from, to})
+      this.apDialog.visible = false
+    },
+    async save() {
+      try {
+        // validate basic info
+        if (!this.$refs.addressInput.hasValue) {
+          this.$alert('Address is required.')
+          return
+        }
+        if (!this.data.modelNo) {
+          this.$alert('Printer model no. is required.')
+          return
+        }
+        if (!this.data.size.length === 0) {
+          this.$alert('Paper size is required.')
+          return
+        }
+        if (this.data.prices.find(v => !v.price)) {
+          this.$alert('Price is invalid.')
+          return
+        }
+        const data = Object.assign({}, this.data)
+        data.color = ['b/w']
+        if (this.data.color) {
+          data.color.push('color')
+        }
+        data.side = ['single']
+        delete data.double
+        if (this.data.double) {
+          data.side.push('double')
+        }
+        data.prices.forEach(item => {
+          item.price = parseFloat(item.price)
+        })
+        // validate opening hours
+        if (data.openingHoursType === 'period' && data.openingHours.length === 0) {
+          this.$alert('The time period is required.')
+          return
+        }
+        this.saving = true
+        await this.$api.post('printer/update', data)
+        this.$notifySuccess('Saved successfully.')
+        this.$router.go(-1)
+      } finally {
+        this.saving = false
+      }
     },
   },
   // created() {},
   async mounted() {
     this.$store.state.toolbar.title = 'Printer Basic Info'
     await this.pull()
-    this.$watch('data.size', this.generatePrices)
-    this.$watch('data.color', this.generatePrices)
-    this.$watch('data.double', this.generatePrices)
-    this.generatePrices()
   },
 }
 function arrMultiply(arrays) {
@@ -143,10 +274,29 @@ function multiply2Arr(arr1, arr2) {
   }
   return r
 }
+function compareTime(hhmm1, hhmm2) {
+  const [h1, m1] = hhmm1.split(':')
+  const [h2, m2] = hhmm2.split(':')
+  return (h1 * 60 + m1) - (h2 * 60 + m2)
+}
 </script>
 
 <style lang="scss">
 .edit-printer-page{
+  .printer-info{
+    font-size: 16px;
+    line-height: 30px;
+    .line{
+      display: flex;
+      align-items: center;
+    }
+    .label{
+      font-weight: bold;
+    }
+    .value{
+      margin-left: .5em;
+    }
+  }
   .price-list{
     border: 1px solid $secondary;
     padding: 5px 10px;
@@ -166,6 +316,48 @@ function multiply2Arr(arr1, arr2) {
   .paper-size-label{
     position: relative;
     top: 2px;
+  }
+  .add-btn{
+    margin: 0;
+    width: auto;
+    &:focus:before {
+      background-color: none;
+    }
+  }
+  // time-period-table ============
+  .time-period-table{
+    width: 300px;
+    line-height: 25px;
+    color: $primary;
+    th{
+      font-weight: 400;
+      color: $secondary;
+      text-align: left;
+    }
+    td{
+      vertical-align: middle;
+    }
+  }
+  .col-from{
+    width: 80px;
+  }
+  .col-to{
+    width: 50px;
+  }
+  .col-action{
+    width: 20px;
+  }
+  .period-remove-btn{
+    cursor: pointer;
+    font-size: 20px;
+    color: #ef6161;
+  }
+  // time-period-table ============
+}
+.add-time-period-card{
+  .weekday-checkbox{
+    display: inline-block;
+    width: 80px;
   }
 }
 </style>

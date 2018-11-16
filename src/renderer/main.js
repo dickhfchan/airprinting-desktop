@@ -5,7 +5,7 @@ import Start from './Start.vue'
 import App from './App.vue'
 import router from './router'
 import store from './store'
-import axios, {getAxiosInstance} from './plugins/axios'
+import axios from './plugins/axios'
 import './plugins/vue-smart-layout-assistant'
 
 // message box
@@ -46,9 +46,8 @@ const start = async () => {
   const wait = hp.waitTime(1500) // show start page at least
   // auth
   const authToken = storage.get('auth_token')
-  const axiosInstance = getAxiosInstance()
   if (authToken) {
-    axiosInstance.defaults.headers.common['Authorization'] = authToken
+    ut.updateAuthToken(authToken)
   }
   const data = await Vue.api.get('initial-data', {
     headers: {Authorization: authToken}

@@ -11,8 +11,8 @@ export default function (opt = {}) {
     auth_url: 'https://accounts.google.com/o/oauth2/v2/auth',
     token_url: 'https://www.googleapis.com/oauth2/v4/token',
     profile_url: 'https://www.googleapis.com/userinfo/v2/me',
-    width: 450,
-    height: 300,
+    width: 680,
+    height: 600,
   }
   opt = Object.assign({}, defaultOpt, opt)
   return googleSignIn()

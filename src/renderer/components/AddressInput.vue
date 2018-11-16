@@ -11,10 +11,10 @@
       v-icon keyboard_arrow_right
   v-dialog(v-model="dialog.visible" fullscreen='', hide-overlay='', transition='dialog-bottom-transition', scrollable)
     v-card.address-input-card(tile='' v-if="dialog.visible")
-      v-toolbar.toolbar-style1(dark color='primary' dense)
+      v-toolbar(dark color='accent')
+        v-btn(icon dark @click.native="dialog.visible=false")
+          v-icon close
         v-toolbar-title
-          v-btn.ma-0(icon dark @click.native="dialog.visible=false")
-            v-icon close
           span Edit Address
       v-card-text
         v-layout

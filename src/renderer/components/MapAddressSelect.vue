@@ -1,31 +1,31 @@
 <template lang="pug">
-.map-address-select(@click="dialog.visible = true" v-if="value")
+.map-address-select(@click="toSearch" v-if="value")
   v-text-field.mt-2.map-address-text-field(
     label="Address" v-model="value.formattedAddress" hide-details append-icon="edit_location"
   )
   .map-address-text-field-mask
   v-dialog(v-model="dialog.visible" fullscreen='', hide-overlay='', transition='dialog-bottom-transition', scrollable)
     v-card.map-address-select-card(tile='')
-      v-toolbar.toolbar-style1(dark color='primary' dense)
+      v-toolbar(dark color='accent')
+        v-btn(icon dark @click.native="dialog.visible=false")
+          v-icon close
         v-toolbar-title
-          v-btn.ma-0(icon dark @click.native="dialog.visible=false")
-            v-icon close
           span Select Address on Map
       //-
       form(@submit.prevent="search")
-        v-text-field.search-input(hide-details='', prepend-inner-icon='search'
+        v-text-field.search-input(hide-details=''
           ref="search"
-          :append-icon="searching ? 'close' : null"
-          @click:prepend-inner="search" @click:append="cancelSearch"
+          append-icon="search"
+          :append-icon-cb="search"
           @focus="searching=true"
-          single-line='' box placeholder="Search Address"
+          single-line='' placeholder="Search Address"
           v-model="searchText"
         )
         button.hidden(type="submit")
       //-
       .GoogleMap_area
         .GoogleMap_map(ref="map")
-        v-card.possible-addresses
+        .possible-addresses
           .addresses-list-title Addresses
           v-list
             v-list-tile(
@@ -46,6 +46,7 @@
 </template>
 
 <script>
+// todo failed get current position in electron
 import * as hp from 'helper-js'
 import GoogleMap from '@/components/GoogleMap.vue'
 import mapStyles from '@/other/googleMapStyles.js'
@@ -90,24 +91,35 @@ export default {
         }
       }
     },
-    async 'dialog.visible'(visible) {
-      if (visible && !this._once_mapInit) {
-        this._once_mapInit = true
+    'dialog.visible': {
+      immediate: true,
+      async handler(visible) {
+        if (!visible) {
+          this.searching = false
+        }
+        //
+        if (!this._visibleChanged) {
+          this._visibleChanged = true
+          return
+        }
+        if (visible && !this._once_mapInit) {
+          this._once_mapInit = true
+          await this.readyPromise
+          this.initMap()
+        }
+        // getPossibleAddresses and set map center
         await this.readyPromise
-        this.initMap()
+        let {latlng} = this.value
+        if (!latlng.lat) {
+          const position = await mapUtils.getCurrentPositionPromise()
+          latlng = {lat: position.coords.latitude, lng: position.coords.longitude}
+        }
+        this.getPossibleAddresses(latlng)
+        const map = await this.mapReadyPromise
+        map.setCenter(latlng)
+        this.mapCenterMarker.setPosition(latlng)
       }
-      // getPossibleAddresses and set map center
-      await this.readyPromise
-      let {latlng} = this.value
-      if (!latlng.lat) {
-        const position = await mapUtils.getCurrentPositionPromise()
-        latlng = {lat: position.coords.latitude, lng: position.coords.longitude}
-      }
-      this.getPossibleAddresses(latlng)
-      const map = await this.mapReadyPromise
-      map.setCenter(latlng)
-      this.mapCenterMarker.setPosition(latlng)
-    },
+    }
   },
   methods: {
     initMap() {
@@ -154,6 +166,10 @@ export default {
           this.$notifyError(`Error: ${status}`)
         }
       })
+    },
+    toSearch() {
+      this.dialog.visible = true
+      // this.searching = true
     },
     selectAddress(item) {
       this.$emit('input', {
@@ -245,11 +261,13 @@ function transfromGeocodeResults(results) {
   }
   // search
   .search-input{
+    padding-top: 0;
      .v-input__slot{
       min-height: 42px;
     }
     input{
       margin-top: 6px;
+      padding: 25px 20px;
     }
     .v-input__prepend-inner{
       margin-top: 10px;

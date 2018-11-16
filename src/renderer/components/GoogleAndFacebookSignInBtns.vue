@@ -14,8 +14,6 @@
 import GoogleSignin from '@/components/GoogleSignin'
 import FacebookSignin from '@/components/FacebookSignin'
 import * as ut from '@/plugins/utils'
-import {getAxiosInstance} from '@/plugins/axios'
-import storage from '@/plugins/storage'
 
 export default {
   components: {GoogleSignin, FacebookSignin},
@@ -39,9 +37,7 @@ export default {
       this.afterLogin(data)
     },
     async afterLogin(data) {
-      storage.set('auth_token', data.token, 60)
-      const axiosInstance = getAxiosInstance()
-      axiosInstance.defaults.headers.common['Authorization'] = data.token
+      ut.updateAuthToken(data.token)
       await ut.pullUser.call(this)
       this.$notifySuccess(`Logined Successfully`)
       this.$emit('success')

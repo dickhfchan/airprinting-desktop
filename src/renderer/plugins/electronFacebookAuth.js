@@ -8,8 +8,8 @@ export default function (opt = {}) {
     // client_id
     scopes: 'public_profile',
     redirect_uri: 'https://www.facebook.com/connect/login_success.html',
-    width: 450,
-    height: 300,
+    width: 680,
+    height: 600,
     api_version: '3.2',
   }
   opt = Object.assign({}, defaultOpt, opt)

@@ -2,6 +2,7 @@ import Vue from 'vue'
 import * as hp from 'helper-js'
 import storage from '@/plugins/storage'
 import {getAxiosInstance} from '@/plugins/axios'
+import io from 'socket.io-client'
 
 export function injectDependency (name, depd) {
   Vue[name] = Vue.prototype[`$${name}`] = depd
@@ -24,8 +25,7 @@ export function keepAlive() {
   window.setInterval(() => {
     if (this.$store.state.authenticated) {
       this.$api.post('/user/keep-alive').then(data => {
-        const axiosInstance = getAxiosInstance()
-        axiosInstance.defaults.headers.common['Authorization'] = data.token
+        updateAuthToken(data.token)
       })
     }
   }, 1000 * 60 * 20)
@@ -34,12 +34,51 @@ export function keepAlive() {
     pullUser.call(this)
   }, 1000 * 60 * 5)
 }
+
+let sockets = []
+export function getSocket(url) {
+  const token = storage.get('auth_token')
+  const socket = io(url, {
+    transportOptions: {
+      polling: {
+        extraHeaders: {
+          'Authorization': storage.get('auth_token'),
+        }
+      }
+    }
+  })
+  sockets.push(socket)
+  return socket
+}
+export function updateAuthToken(token) {
+  storage.set('auth_token', token, 60)
+  const axiosInstance = getAxiosInstance()
+  axiosInstance.defaults.headers.common['Authorization'] = token
+  // reconnect sockets
+  sockets = sockets.filter(v => v.connected)
+  sockets.forEach(socket => {
+    socket.io.opts.transportOptions.polling.extraHeaders.Authorization = token
+    socket.disconnect()
+    socket.connect()
+  })
+}
 // must use vm as context
 export function logout() {
+  storage.set('auth_token', null)
   const axiosInstance = getAxiosInstance()
   delete axiosInstance.defaults.headers.common['Authorization']
   this.$store.state.authenticated = false
   this.$store.state.user = {}
+  //
+  sockets.forEach(socket => {
+    socket.disconnect()
+  })
+  sockets = []
+}
+// must use vm as context
+export function getFileUrl(key) {
+  const {region, bucketName} = this.$store.state.s3
+  return `https://s3-${region}.amazonaws.com/${bucketName}/${key}`
 }
 // must use vm as context
 export function getPrinterSupport(type, value) {
@@ -69,10 +108,7 @@ export function priceAdd(m1, m2) {
   return parseFloat(r.toFixed(3))
 }
 
-export function pdfOptionPageNumberText(pages, totalPages) {
-  if (totalPages != null && pages.length === totalPages) {
-    return 'All pages'
-  }
+export function groupPages(pages) {
   const groups = []
   let last // last group
   for (const page of pages) {
@@ -87,6 +123,13 @@ export function pdfOptionPageNumberText(pages, totalPages) {
       groups.push(last)
     }
   }
+  return groups
+}
+export function pdfOptionPageNumberText(pages, totalPages) {
+  if (totalPages != null && pages.length === totalPages) {
+    return 'All pages'
+  }
+  const groups = groupPages(pages)
   const arr = groups.map(group => group.length === 1 ? group[0] : `${group[0]} - ${hp.arrayLast(group)}`)
   return arr.join(', ')
 }

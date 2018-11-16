@@ -25,6 +25,7 @@ function createWindow () {
       webSecurity: false,
     },
   })
+  mainWindow.webContents.openDevTools()
 
   mainWindow.loadURL(winURL)
 

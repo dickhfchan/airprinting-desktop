@@ -26,23 +26,23 @@ v-app.layout-default
         v-list-tile-content
           v-list-tile-title Settings
   v-content
-    v-container
+    v-container(fluid)
       v-layout
         v-flex(xs12)
+          PrintingTaskAlert
           transition(name="slide-x-transition" mode="out-in")
             router-view
 </template>
 
 <script>
 import * as ut from '@/plugins/utils'
-import {getAxiosInstance} from '@/plugins/axios'
-import storage from '@/plugins/storage'
+import PrintingTaskAlert from '@/components/PrintingTaskAlert'
 
 export default {
-  // components: {},
+  components: {PrintingTaskAlert},
   data() {
     return {
-      drawer: true,
+      drawer: window.innerWidth > 768,
     }
   },
   // computed: {},
@@ -52,9 +52,7 @@ export default {
       this.$router.go(-1)
     },
     async logout() {
-      storage.set('auth_token', null)
-      const axiosInstance = getAxiosInstance()
-      delete axiosInstance.defaults.headers.common['Authorization']
+      ut.logout.call(this)
       await ut.pullUser.call(this)
       this.$router.push({name: 'login'})
     },
