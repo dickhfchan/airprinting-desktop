@@ -1,5 +1,10 @@
 import edge from 'electron-edge-js'
-const path = require('path');
+import {extraResourcePath} from '@/plugins/electron-utils'
+const path = require('path')
+
+const p = (pt) => {
+  return extraResourcePath(`src/renderer/printer/${pt}`)
+}
 
 const Constants = {
     printJobInfo: {
@@ -46,7 +51,7 @@ const Helper = {
 
     getAllInstalledPrinterNames: () => new Promise((resolve, reject) => {
         const dnet = edge.func(`
-#r "${path.join(__dirname, 'PrinterHelper.dll')}"
+#r "${p('PrinterHelper.dll')}"
 
 using System;
 using System.Threading.Tasks;
@@ -72,7 +77,7 @@ public class Startup
 
     getPrinterInfo: printerName => new Promise((resolve, reject) => {
         const dnet = edge.func(`
-#r "${path.join(__dirname, 'PrinterHelper.dll')}"
+#r "${p('PrinterHelper.dll')}"
 
 using System;
 using System.Dynamic;
@@ -129,7 +134,7 @@ public class Startup
 
     getDefaultPrinterName: ()=> new Promise((resolve, reject) => {
         const dnet = edge.func(`
-#r "${path.join(__dirname, 'PrinterHelper.dll')}"
+#r "${p('PrinterHelper.dll')}"
 
 using System;
 using System.Linq;
@@ -157,7 +162,7 @@ public class Startup
 
     printPdf: param => new Promise((resolve, reject) => {
         const dnet = edge.func(`
-#r "${path.join(__dirname, 'PrinterHelper.dll')}"
+#r "${p('PrinterHelper.dll')}"
 
 using System;
 using System.Linq;
@@ -236,7 +241,7 @@ public class Startup
 
     getPdfPrintJobInfo: param => new Promise((resolve, reject) => {
         const dnet = edge.func(`
-#r "${path.join(__dirname, 'PrinterHelper.dll')}"
+#r "${p('PrinterHelper.dll')}"
 
 using System;
 using System.Linq;
@@ -328,7 +333,7 @@ public class Startup
     }),
     getPrintStatusInfo: (printerName, documentName) => new Promise((resolve, reject) => {
         const dnet = edge.func(`
-#r "${path.join(__dirname, 'PrinterHelper.dll')}"
+#r "${p('PrinterHelper.dll')}"
 
 using System;
 using System.Linq;

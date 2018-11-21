@@ -40,6 +40,7 @@
         }
       ]
     },
+    "extraResources": ["src/renderer/printer"],
     "mac": {
       "icon": "build/icons/icon.icns"
     },
