@@ -1,7 +1,7 @@
 <template lang="pug">
-.edit-printer-page
-  .display-1.accent--text Edit printer
-  v-card.mt-3(v-if="data")
+.edit-printer-page(v-if="pulled")
+  .display-1.accent--text {{mode === 'edit' ? 'Edit' : 'Add'}} printer
+  v-card.mt-3
     v-card-text
       .printer-info
         .line
@@ -88,6 +88,8 @@ export default {
   components: {AddressInput},
   data() {
     return {
+      pulled: false,
+      mode: 'edit',
       optionsInfo: this.$store.state.printerFilterInfo,
       data: null,
       saving: false,
@@ -129,13 +131,16 @@ export default {
   // watch: {},
   methods: {
     async pull() {
-      const data = await this.$api.post('printer/mine')
+      const mime = await this.$api.post('printer/mine')
+      this.mode = mime ? 'edit' : 'new'
+      const data = mime || {size: [], color: [], side: []}
       data.prices = data.prices || []
       if (!data.openingHours) {
         data.openingHours = []
       }
       this.data = data
       this.generatePrices()
+      this.pulled = true
     },
     generatePrices() {
       const colors = this.data.color

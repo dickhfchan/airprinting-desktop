@@ -12,7 +12,7 @@
   v-dialog(v-model="dialog.visible" fullscreen='', hide-overlay='', transition='dialog-bottom-transition', scrollable)
     v-card.address-input-card(tile='' v-if="dialog.visible")
       v-toolbar(dark color='accent')
-        v-btn(icon dark @click.native="dialog.visible=false")
+        v-btn(icon dark @click.native="closeDialog")
           v-icon close
         v-toolbar-title
           span Edit Address
@@ -62,7 +62,7 @@ export default {
         addressDetail: null,
       }
     },
-    saveAddress() {
+    validate() {
       const constraints = {
         areaCode: {
           presence: true,
@@ -79,11 +79,16 @@ export default {
       }
       const validateResult = validate(this.data, constraints)
       if (validateResult) {
-        this.$alert(Object.values(validateResult)[0][0])
-        return
+        return Object.values(validateResult)[0][0]
       }
       if (!this.data.address.formattedAddress) {
-        this.$alert(`Address can't be blank`)
+        return `Address can't be blank`
+      }
+    },
+    saveAddress() {
+      const validateResult = this.validate()
+      if (validateResult) {
+        this.$alert(validateResult)
         return
       }
       const cloned = hp.mapObjectTree(this.data, () => null)
@@ -92,6 +97,10 @@ export default {
     },
     getValueDetails(value) {
       this.data = value ? hp.mapObjectTree(value, () => null) : this.getDefaultData()
+    },
+    closeDialog() {
+      this.dialog.visible = false
+      this.data = this.getDefaultData()
     },
   },
   // created() {},

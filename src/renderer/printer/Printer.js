@@ -52,4 +52,20 @@ export default class Printer {
     static getDefaultPrinterName(){
         return relay.getDefaultPrinterName();
     }
+
+    static async getInstalledPrinters() {
+      const names = await Printer.getInstalledPrinterNames()
+      const printers = []
+      for (const name of names) {
+        const printer = new Printer(name)
+        await printer.init()
+        printers.push({
+          name,
+          color: printer.supportsColor,
+          duplex: printer.canDuplex,
+          sizes: printer.paperSizes,
+        })
+      }
+      return printers
+    }
 }
