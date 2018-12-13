@@ -1,13 +1,13 @@
 <template lang="pug">
 .address-input
-  .address-display(@click="dialog.visible=true")
+  .address-display(@click="onclick")
     .address-display-left
       template(v-if="hasValue")
         .address-line1 {{data.address.formattedAddress}}
         .address-line2 {{data.addressDetail}}
         .address-line3 {{data.contactName}} {{data.areaCode}}{{data.phone}}
       .address-line3(v-else) No address selected
-    v-btn.edit-btn(icon)
+    v-btn.edit-btn(v-if="!readonly" icon)
       v-icon keyboard_arrow_right
   v-dialog(v-model="dialog.visible" fullscreen='', hide-overlay='', transition='dialog-bottom-transition', scrollable)
     v-card.address-input-card(tile='' v-if="dialog.visible")
@@ -39,6 +39,7 @@ export default {
   components: {MapAddressSelect},
   props: {
     value: {},
+    readonly: {},
   },
   data() {
     return {
@@ -53,6 +54,11 @@ export default {
   },
   // watch: {},
   methods: {
+    onclick() {
+      if (!this.readonly) {
+        this.dialog.visible = true
+      }
+    },
     getDefaultData() {
       return {
         areaCode: '+852',

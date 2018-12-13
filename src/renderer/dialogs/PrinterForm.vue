@@ -316,6 +316,7 @@ export default {
           await this.$api.post('printer/update', data)
         }
         this.$notifySuccess('Saved successfully.')
+        this.$emit('saved')
         this.visible = false
       } finally {
         this.$hideToast()
@@ -385,10 +386,6 @@ function compareTime(hhmm1, hhmm2) {
       margin-top: 0px;
       padding-top: 5px;
     }
-  }
-  .paper-size-label{
-    position: relative;
-    top: 2px;
   }
   .add-btn{
     margin: 0;

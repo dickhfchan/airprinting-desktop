@@ -20,6 +20,7 @@
           @focus="searching=true"
           single-line='' placeholder="Search Address"
           v-model="searchText"
+          @input="searchInputing"
         )
         button.hidden(type="submit")
       //-
@@ -169,7 +170,6 @@ export default {
     },
     toSearch() {
       this.dialog.visible = true
-      // this.searching = true
     },
     selectAddress(item) {
       this.$emit('input', {
@@ -197,6 +197,16 @@ export default {
         items = transfromGeocodeResults(items)
         this.searched = items
       })
+    },
+    searchInputing() {
+      if (this._searchInputingTimeout) {
+        clearTimeout(this._searchInputingTimeout)
+        this._searchInputingTimeout = null
+      }
+      this._searchInputingTimeout = setTimeout(() => {
+        this.search()
+        this._searchInputingTimeout = null
+      }, 300)
     },
     selectSearchResult(item) {
       const geocoder = new window.google.maps.Geocoder

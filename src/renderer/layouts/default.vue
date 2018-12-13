@@ -25,6 +25,18 @@ v-app.layout-default
           v-icon settings
         v-list-tile-content
           v-list-tile-title Settings
+  v-navigation-drawer(v-model='drawerRight', fixed='', right='', app='')
+    v-list.main-menu(dense='')
+      v-list-tile(:to="{name: 'home'}")
+        v-list-tile-action
+          v-icon print
+        v-list-tile-content
+          v-list-tile-title My printer
+      v-list-tile(@click='')
+        v-list-tile-action
+          v-icon settings
+        v-list-tile-content
+          v-list-tile-title Settings
   v-content
     v-container(fluid)
       v-layout
@@ -42,7 +54,8 @@ export default {
   components: {PrintingTaskAlert},
   data() {
     return {
-      drawer: window.innerWidth > 768,
+      drawer: true,
+      drawerRight: true,
     }
   },
   // computed: {},
