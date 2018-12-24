@@ -15,7 +15,7 @@ export function isISO8601(str) {
 //
 // must use vm as context
 export function pullUser() {
-  return this.$api.post('/user/current-user').then(data => {
+  return this.$api.get('/user/current').then(data => {
     this.$store.state.user = data
     this.$store.state.authenticated = !data.isAnonymous
   })
@@ -25,7 +25,7 @@ export function keepAlive() {
   // refresh auth token per 20 minutes
   window.setInterval(() => {
     if (this.$store.state.authenticated) {
-      this.$api.post('/user/keep-alive').then(data => {
+      this.$api.get('/user/keep_alive').then(data => {
         updateAuthToken(data.token)
       })
     }

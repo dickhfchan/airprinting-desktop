@@ -20,7 +20,7 @@ export default {
   methods: {
     async click() {
       const code = await electronGoogleAuth({
-        client_id: this.clientId || this.$store.state.googleSignin.clientId,
+        client_id: this.clientId || this.$store.state.config.GOOGLE_SINGIN_CLIENT_ID,
       })
       this.$emit('success', code)
     },

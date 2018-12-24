@@ -106,7 +106,8 @@ export default {
     },
     closeDialog() {
       this.dialog.visible = false
-      this.data = this.getDefaultData()
+      // restore showing data
+      this.getValueDetails(this.value)
     },
   },
   // created() {},

@@ -28,12 +28,12 @@ export default {
   // watch: {},
   methods: {
     async googleLogin(code) {
-      const data = await this.$api.post(`/google/login-or-register`, {code})
+      const data = await this.$api.post(`/google/login_or_register`, {code})
       this.afterLogin(data)
     },
     async facebookLogin(response) {
       const token = response.access_token
-      const data = await this.$api.post(`/facebook/login-or-register`, {token})
+      const data = await this.$api.post(`/facebook/login_or_register`, {token})
       this.afterLogin(data)
     },
     async afterLogin(data) {

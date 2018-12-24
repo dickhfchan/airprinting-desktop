@@ -53,8 +53,9 @@ export default {
       return ts.uploadXhr(xhr, file, form)
     },
     async added(newFile) {
-      const respData = await this.$api.post('file/sign', {filename: newFile.name})
-      const data = JSON.parse(respData.json)
+      const data = await this.$api.post('file/sign', {filename: newFile.name}, {
+        disableResponseDataTransform: true,
+      })
       newFile.data.key = data.key
       newFile.data.file = newFile.file
       delete data.key

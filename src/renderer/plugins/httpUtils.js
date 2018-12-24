@@ -29,5 +29,8 @@ export function resolveResponseData(respData) {
 }
 
 export function resolveErrorHttpMessage(data, response, error) {
-  return data ? (data.message || data.error || data.errorDetails || data.errorCode || response && response.statusText) : (error ? error.message : 'No details.')
+  return data ? (data.message || validMessage(data.error) || validMessage(data.errorDetails) || validMessage(data.errorCode) || response && response.statusText) : (error ? error.message : 'No details.')
+  function validMessage(msg) {
+    return msg && hp.isString(msg) && msg
+  }
 }

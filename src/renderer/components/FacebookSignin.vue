@@ -21,7 +21,7 @@ export default {
   methods: {
     async click() {
       const response = await electronFacebookAuth({
-        client_id: this.appId || this.$store.state.facebookSignin.appId,
+        client_id: this.appId || this.$store.state.config.FACEBOOK_SINGIN_APP_ID,
       })
       this.$emit('success', response)
     },

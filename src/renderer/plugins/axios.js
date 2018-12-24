@@ -26,17 +26,17 @@ export default {
     })
     function handleResponse(response, error) {
       let {data} = response || {}
-      if (data) {
+      const {config} = error || response
+      if (data && !config.disableResponseDataTransform) {
         data = httpUtils.resolveResponseData(data)
       }
-      const pureData = data && data.data
-      const {config} = error || response
+      const pureData = data
       if (error && !error.response && error.message.match(/^timeout of \d+ms exceeded$/)) {
         doAlert('Request timed out')
         config.finally && config.finally(error)
         return Promise.reject(error)
       }
-      if (error || data.result === 'failed') {
+      if (error) {
         const msg = httpUtils.resolveErrorHttpMessage(data, response, error)
         // show sign in dialog when get 401
         if (response.status === 401) {

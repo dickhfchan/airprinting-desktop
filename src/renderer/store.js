@@ -9,7 +9,7 @@ export default new Vuex.Store({
     authenticated: false,
     user: {},
     // dev
-    api: `http://10.0.2.2:8081/api/v1`,
+    api: `http://10.0.2.2:8081/api`,
     socket: `http://10.0.2.2:8081`,
     // prod
     // api: `https://knode.co:8088/api/v1`,
@@ -35,16 +35,7 @@ export default new Vuex.Store({
     },
     signInDialogVisible: false,
     // from backend
-    recaptcha: null,
-    googleSignin: null,
-    googleMap: null,
-    facebookSignin: null,
-    siteHomeTitle: null,
-    siteName: null,
-    payment: null,
-    s3: null,
-    stripe: null,
-    order: null,
+    config: {},
   },
   mutations: {},
   actions: {},

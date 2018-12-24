@@ -49,8 +49,9 @@ const start = async () => {
   if (authToken) {
     ut.updateAuthToken(authToken)
   }
-  const data = await Vue.api.get('initial-data', {
-    headers: {Authorization: authToken}
+  const data = await Vue.api.get('/client/initial_data', {
+    headers: {Authorization: authToken},
+    disableResponseDataTransform: true,
   })
   Object.assign(store.state, data)
   await wait
