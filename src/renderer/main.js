@@ -49,9 +49,10 @@ const start = async () => {
   if (authToken) {
     ut.updateAuthToken(authToken)
   }
-  const data = await Vue.api.get('initial-data', {
-    headers: {Authorization: authToken}
-  })
+  // const data = await Vue.api.get('initial-data', {
+  //   headers: {Authorization: authToken}
+  // })
+  const data = {}
   Object.assign(store.state, data)
   await wait
   start.$destroy()

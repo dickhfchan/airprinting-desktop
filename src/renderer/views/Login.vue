@@ -7,12 +7,18 @@
       .default-user-avatar
         v-icon person
     GoogleAndFacebookSignInBtns.mt-4(@success="$router.push({name: 'home'})")
+    v-btn.mrs(v-for="name in printerNames" @click="print(name)") {{name}}
 </template>
 
 <script>
 import * as hp from 'helper-js'
 import anime from 'animejs'
 import GoogleAndFacebookSignInBtns from '@/components/GoogleAndFacebookSignInBtns'
+import Printer from '@/printer/Printer.js'
+import PdfPrintJob from '@/printer/PdfPrintJob.js'
+import PrintStatus from '@/printer/PrintStatus.js'
+import electron from 'electron'
+const {dialog} = electron.remote
 
 let first = true
 
@@ -22,6 +28,7 @@ export default {
     return {
       logoStyle: null,
       btnsVisible: false,
+      printerNames: null,
     }
   },
   // computed: {},
@@ -55,6 +62,51 @@ export default {
         })
       }
     },
+    async print(name) {
+      // get info of default printer
+      const printer = new Printer(name);
+      await printer.init();
+      console.log("info of printer:");
+      console.log("  Name: " + printer.printerName);
+      console.log("  Support color: " + printer.supportsColor);
+      console.log("  Support duplex: " + printer.canDuplex); // support double sided
+      console.log("  Paper sizes: " + printer.paperSizes.join(", "));
+      console.log("");
+      // print a pdf
+      const files = dialog.showOpenDialog({
+        properties: [ 'openFile'],
+        filters: [
+          { name: 'PDF', extensions: ['pdf'] },
+        ],
+      })
+      if (!files) {
+        return
+      }
+      const pdfFileName = files[0]
+      const job = new PdfPrintJob(pdfFileName);
+      await job.init();
+      console.log("There are " + job.pageCount + " pages in " + job.pdfFilePath);
+      job.printerName = name;   // change printer
+      job.range = "2-5";  // change print range to page 2-3 only
+                          // if you want to print all, set job.range="all";
+      job.duplex = true;  // double sided
+      job.paperSize = "A4";   // paper size
+                              // make sure the paper size is supported by the selected printer
+      await job.print();
+      console.log("trigged the printing job");
+      console.log("document name is " + job.documentName);
+
+      // check printing status
+      while (true){
+          const status = new PrintStatus(job.printerName, job.documentName);
+          await status.init();
+          if (status.completed || status.deleted || status.printed){
+              break;
+          }
+          await new Promise(resolve => setTimeout(resolve, 1000));    // sleep 1s
+      }
+      alert('printed successfully')
+    },
   },
   // created() {},
   async mounted() {
@@ -65,6 +117,8 @@ export default {
     } else {
       this.playAnimate({immediate: true})
     }
+
+    this.printerNames = await Printer.getInstalledPrinterNames()
   },
 }
 </script>

@@ -6,7 +6,7 @@ export function extraResourcePath(relativePath) {
   if (process.env.NODE_ENV === 'production') {
     return path.join(process.resourcesPath, relativePath)
   } else {
-    const projectDir = path.resolve(__filename, '../../../')
+    const projectDir = path.resolve(__filename, '../../../../')
     return path.join(projectDir, relativePath)
   }
 }
