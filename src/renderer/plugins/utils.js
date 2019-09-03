@@ -3,6 +3,7 @@ import * as hp from 'helper-js'
 import storage from '@/plugins/storage'
 import {getAxiosInstance} from '@/plugins/axios'
 import io from 'socket.io-client'
+import store from '../store'
 
 export function injectDependency (name, depd) {
   Vue[name] = Vue.prototype[`$${name}`] = depd
@@ -96,16 +97,18 @@ export function getPrinterSupport(type, value) {
   }
 }
 // must use vm as context
-export function calcPrice(price) {
-  price = parseFloat(price.toFixed(3))
+export function calcPriceCommission(price) {
+  const precision = store.state.order.pricePrecision
+  price = parseFloat(price.toFixed(precision))
   let commission = this.$store.state.order.commission * price
-  commission = parseFloat(commission.toFixed(3))
+  commission = parseFloat(commission.toFixed(precision))
   return [price, commission]
 }
 
 export function priceAdd(m1, m2) {
-  let r = parseFloat(m1.toFixed(3)) + parseFloat(m2.toFixed(3))
-  return parseFloat(r.toFixed(3))
+  const precision = store.state.order.pricePrecision
+  let r = parseFloat(m1.toFixed(precision)) + parseFloat(m2.toFixed(precision))
+  return parseFloat(r.toFixed(precision))
 }
 
 export function groupPages(pages) {

@@ -12,8 +12,8 @@ export default new Vuex.Store({
     // api: `http://10.0.2.2:8081/api/v1`,
     // socket: `http://10.0.2.2:8081`,
     // prod
-    api: `https://knode.co:8088/api/v1`,
-    socket: `https://knode.co:8088`,
+    api: `http://54.179.187.95:8072/api`,
+    socket: `http://54.179.187.95:8072`,
     printerFilterInfo: {
       size: [
         {text: 'A4', value: 'a4'},
