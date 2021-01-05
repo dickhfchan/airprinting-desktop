@@ -55,7 +55,7 @@
   },
   "dependencies": {
     "animejs": "^2.2.0",
-    "axios": "^0.18.0",
+    "axios": "^0.21.1",
     "electron-edge-js": "^8.3.8",
     "electron-store": "^2.0.0",
     "helper-js": "^1.2.2",
